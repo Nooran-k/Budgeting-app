@@ -7,7 +7,8 @@ import controller.BudgetController;
 import view.BudgetView;
 import view.GoalView;
 import controller.GoalController;
-
+import view.ReportView;
+import controller.ReportController;
 import javax.swing.*;
 
 public class Main {
@@ -17,6 +18,7 @@ public class Main {
         TransactionController  txController     = new TransactionController(budgetController);
         BudgetController       budgetController = new BudgetController(notifController);
         GoalController         goalController   = new GoalController(notifController);
+        ReportController       reportController = new ReportController();
          SwingUtilities.invokeLater(() -> {
 
             JFrame frame = new JFrame("Budget App");
@@ -32,6 +34,8 @@ public class Main {
                            tabs.addTab("Goals",
                     new GoalView(goalController));
                      frame.add(tabs);
+           tabs.addTab("Reports",
+                    new ReportView(reportController));
             frame.setVisible(true);
         });
     }
