@@ -8,7 +8,6 @@ public class AuthController {
 
     private static final String DB_URL = "jdbc:sqlite:budgetapp.db";
 
-    // Runs once when the app starts — creates the table if it doesn't exist yet
     static {
         try (Connection conn = connect();
              Statement stmt = conn.createStatement()) {
@@ -27,8 +26,7 @@ public class AuthController {
     }
 
 
-    // ── REGISTER ─────────────────────────────────────────────────────────────
-
+//Register
     public static String register(String name, String email,
                                   String pass, String confirm) {
         name  = name.trim();
@@ -59,7 +57,7 @@ public class AuthController {
     }
 
 
-    // ── LOGIN ─────────────────────────────────────────────────────────────────
+//login
 
     public static User login(String email, String pass) {
         email = email.trim();
@@ -90,7 +88,7 @@ public class AuthController {
     }
 
 
-    // ── HELPERS ───────────────────────────────────────────────────────────────
+//helpers
 
     private static Connection connect() throws SQLException {
         try {

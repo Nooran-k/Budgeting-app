@@ -20,11 +20,11 @@ public class LoginPanel extends JPanel {
         JTextField     email = new JTextField();
         JPasswordField pass  = new JPasswordField();
 
-        JLabel msg = new JLabel(" ");   // space so it reserves height
+        JLabel msg = new JLabel(" ");
         msg.setForeground(Color.RED);
         msg.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // ── Buttons ──────────────────────────────────────────────────────────
+ //Buttons
         JButton login = new JButton("Login");
         styleButton(login);
 
@@ -36,14 +36,14 @@ public class LoginPanel extends JPanel {
         back.setForeground(new Color(100, 100, 100));
         back.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // ── Field sizes ───────────────────────────────────────────────────────
+//Field sizes
         Dimension fieldSize = new Dimension(200, 30);
         email.setMaximumSize(fieldSize);
         pass.setMaximumSize(fieldSize);
 
-        // ── Actions ───────────────────────────────────────────────────────────
+//Actions
         login.addActionListener(e -> {
-            msg.setText(" ");           // clear previous error before trying
+            msg.setText(" ");           // clear the error message before trying again
 
             User user = AuthController.login(
                     email.getText(),
@@ -59,7 +59,7 @@ public class LoginPanel extends JPanel {
 
         back.addActionListener(e -> frame.showScreen("welcome"));
 
-        // ── Layout ────────────────────────────────────────────────────────────
+//layout
         form.add(new JLabel("Email"));
         form.add(email);
         form.add(Box.createVerticalStrut(10));

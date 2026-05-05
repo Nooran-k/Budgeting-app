@@ -25,7 +25,7 @@ public class SignupPanel extends JPanel {
         msg.setForeground(Color.RED);
         msg.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // ── Buttons ───────────────────────────────────────────────────────────
+//Buttons
         JButton create = new JButton("Create Account");
         styleButton(create);
 
@@ -37,16 +37,16 @@ public class SignupPanel extends JPanel {
         back.setForeground(new Color(100, 100, 100));
         back.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // ── Field sizes ───────────────────────────────────────────────────────
+//Feild sizes
         Dimension fieldSize = new Dimension(200, 30);
         name.setMaximumSize(fieldSize);
         email.setMaximumSize(fieldSize);
         pass.setMaximumSize(fieldSize);
         confirm.setMaximumSize(fieldSize);
 
-        // ── Actions ───────────────────────────────────────────────────────────
+//Actions
         create.addActionListener(e -> {
-            msg.setText(" ");           // clear previous error before trying
+            msg.setText(" ");           // clear the error message before trying again
 
             String result = AuthController.register(
                     name.getText(),
@@ -64,7 +64,7 @@ public class SignupPanel extends JPanel {
 
         back.addActionListener(e -> frame.showScreen("welcome"));
 
-        // ── Layout ────────────────────────────────────────────────────────────
+//layout
         form.add(new JLabel("Name"));
         form.add(name);
         form.add(Box.createVerticalStrut(10));

@@ -7,7 +7,7 @@ public class WelcomePanel extends JPanel {
 
     public WelcomePanel(MainFrame frame) {
 
-        setLayout(new GridBagLayout()); // center container
+        setLayout(new GridBagLayout());
         setBackground(Color.white);
 
         JPanel box = new JPanel();
@@ -26,7 +26,6 @@ public class WelcomePanel extends JPanel {
         signup.setFocusPainted(false);
         login.setFocusPainted(false);
 
-        // 🔹 small upgrade (padding inside button)
         signup.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         login.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
@@ -43,7 +42,7 @@ public class WelcomePanel extends JPanel {
 
         // layout (vertical)
         box.add(signup);
-        box.add(Box.createVerticalStrut(15)); // spacing
+        box.add(Box.createVerticalStrut(15));
         box.add(login);
 
         add(box);
