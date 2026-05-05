@@ -3,7 +3,10 @@ import data.DataStore;
 import controller.TransactionController;
 import view.AddTransactionView;
 import controller.NotificationController;
-
+import controller.BudgetController;
+import view.BudgetView;
+import view.GoalView;
+import controller.GoalController;
 
 import javax.swing.*;
 
@@ -12,6 +15,8 @@ public class Main {
         new MainFrame();
         NotificationController notifController  = new NotificationController();
         TransactionController  txController     = new TransactionController(budgetController);
+        BudgetController       budgetController = new BudgetController(notifController);
+        GoalController         goalController   = new GoalController(notifController);
          SwingUtilities.invokeLater(() -> {
 
             JFrame frame = new JFrame("Budget App");
@@ -22,9 +27,11 @@ public class Main {
             JTabbedPane tabs = new JTabbedPane();
             tabs.addTab("Transactions",
                     new AddTransactionView(txController, notifController));
-    
-
-            frame.add(tabs);
+           tabs.addTab("Budgets",
+                    new BudgetView(budgetController));
+                           tabs.addTab("Goals",
+                    new GoalView(goalController));
+                     frame.add(tabs);
             frame.setVisible(true);
         });
     }
