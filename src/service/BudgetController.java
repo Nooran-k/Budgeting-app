@@ -1,83 +1,109 @@
 package controller;
 
+import data.DataStore;
 import model.Budget;
 import model.BudgetStatus;
-import view.BudgetView;
-import java.util.ArrayList;
+
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 
 public class BudgetController {
 
-    private List<Budget> budgets;
-    private BudgetView view;
+    private List<Budget>              budgets;
+    private NotificationController    notifController;
 
-    
-    public BudgetController(BudgetView view) {
-        this.view = view;
-        this.budgets = new ArrayList<>();
-    }
-
-    public void createBudget(String category, double amount, int threshold) {
-
-        for (Budget b : budgets) {
-            if (b.getCategory().equals(category)) {
-                view.showError("Budget for " + category + " already exists!");
-                return;
-            }
-        }
-
-        if (amount <= 0) {
-            view.showError("Amount must be greater than 0!");
-            return;
-        }
-
-        Budget newBudget = new Budget(category, amount, threshold);
-        budgets.add(newBudget);
-
-        view.displayBudgets(budgets);
-        view.showSuccess("Budget created successfully!");
-    }
-
-  
-    public void onExpenseAdded(String category, double amount) {
-
-        Budget budget = findByCategory(category);
-
-        if (budget == null) return;
-
-        budget.add_expense(amount);
-
-        BudgetStatus status = budget.calc_status();
-
-        if (status == BudgetStatus.EXCEEDED) {
-            double overage = budget.getSpentAmount() - budget.getBudgetAmount();
-            view.showExceededAlert(budget.getCategory(), overage);
-
-        } else if (status == BudgetStatus.NEAR_LIMIT) {
-            view.showNearLimitAlert(budget.getCategory(), budget.calc_percentage());
-        }
-
-        view.displayBudgets(budgets);
+    public BudgetController(NotificationController notifController) {
+        this.notifController = notifController;
+        this.budgets = DataStore.loadBudgets();
     }
 
     
-    public void loadBudgets() {
+    public Budget createBudget(int userId, int categoryId, String categoryName,
+                               double limitAmount, LocalDate startDate,
+                               LocalDate endDate, int alertThreshold) {
+        
+        boolean duplicate = budgets.stream().anyMatch(b ->
+                b.getUserId()    == userId
+             && b.getCategoryId() == categoryId
+             && !b.getStartDate().isAfter(endDate)     
+             && !b.getEndDate().isBefore(startDate));
+
+        if (duplicate) return null; 
+
        
-        view.displayBudgets(budgets);
+        int id = DataStore.nextBudgetId();
+        Budget budget = new Budget(id, userId, categoryId, categoryName,
+                                   limitAmount, startDate, endDate, alertThreshold);
+        budgets.add(budget);
+        DataStore.saveBudgets(budgets);
+        return budget;
     }
 
-  
-    private Budget findByCategory(String category) {
+   
+    public boolean editBudget(int budgetId, double newLimit, int newThreshold) {
         for (Budget b : budgets) {
-            if (b.getCategory().equals(category)) {
-                return b;
+            if (b.getBudgetId() == budgetId) {
+                b.setLimitAmount(newLimit);
+                b.setAlertThreshold(newThreshold);
+                DataStore.saveBudgets(budgets);
+                return true;
             }
         }
-        return null; 
+        return false;
+    }
+
+   
+    public boolean deleteBudget(int budgetId) {
+        boolean removed = budgets.removeIf(b -> b.getBudgetId() == budgetId);
+        if (removed) DataStore.saveBudgets(budgets);
+        return removed;
+    }
+
+   
+    public void trackBudgetUsage(int userId, int categoryId, double amount) {
+       
+        LocalDate today = LocalDate.now();
+        Optional<Budget> match = budgets.stream().filter(b ->
+                b.getUserId()    == userId
+             && b.getCategoryId() == categoryId
+             && !today.isBefore(b.getStartDate())
+             && !today.isAfter(b.getEndDate()))
+            .findFirst();
+
+        if (match.isEmpty()) return; 
+
+        Budget b = match.get();
+        BudgetStatus before = b.getStatus();
+
+        b.addExpense(amount);
+        DataStore.saveBudgets(budgets); 
+
+        if (b.checkIfAlertNeeded()) {
+            boolean exceeded = b.getStatus() == BudgetStatus.EXCEEDED;
+           
+            if (b.getStatus() != before || before == BudgetStatus.ON_TRACK) {
+                notifController.pushBudgetAlert(userId, b.getCategoryName(),
+                     b.calculateUsagePercentage(), exceeded);
+            }
+        }
+    }
+
+   
+    public List<Budget> getBudgetForMonth(int userId, int month, int year) {
+        return budgets.stream().filter(b -> {
+            if (b.getUserId() != userId) return false;
+            LocalDate start = b.getStartDate();
+            return start.getMonthValue() == month && start.getYear() == year;
+        }).collect(Collectors.toList());
     }
 
 
-    public List<Budget> getBudgets() {
-        return budgets;
+    public List<Budget> getAllBudgets(int userId) {
+        return budgets.stream()
+                .filter(b -> b.getUserId() == userId)
+                .collect(Collectors.toList());
     }
 }
