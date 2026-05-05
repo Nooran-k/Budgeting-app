@@ -9,7 +9,7 @@ public class GoalController {
         loadGoals();
     }
 
-    public void createGoal(String name, double target, 
+    public void createGoal(String name, double target,
                             LocalDate deadline, double initial) {
         if (name == null || name.trim().isEmpty()) {
             view.showError("Goal name cannot be empty!");
@@ -30,10 +30,10 @@ public class GoalController {
 
         double monthly = goal.calculateMonthlySavingsNeeded();
         view.showSuccessMessage(
-            "Goal created! 💪 Save $" + 
+            "Goal created! 💪 Save $" +
             String.format("%.2f", monthly) + "/month to reach it.");
-        
-        view.displayGoals(goals); 
+
+        view.displayGoals(goals);
     }
 
     public void addContribution(String goalId, double amount) {
@@ -47,7 +47,7 @@ public class GoalController {
             view.showGoalCompleted(goal.getGoalName());
         }
 
-        view.displayGoals(goals); 
+        view.displayGoals(goals);
     }
 
     public void loadGoals() {

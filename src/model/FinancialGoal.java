@@ -3,11 +3,11 @@ package model;
 public class FinancialGoal {
     private String goalId;
     private String goalName;
-    private double targetAmount;   
-    private double currentAmount;  
+    private double targetAmount;
+    private double currentAmount;
     private LocalDate deadline;
 
-    public FinancialGoal(String goalName, double targetAmount, 
+    public FinancialGoal(String goalName, double targetAmount,
                           double initialAmount, LocalDate deadline) {
         this.goalId = UUID.randomUUID().toString();
         this.goalName = goalName;
@@ -35,7 +35,7 @@ public class FinancialGoal {
         return GoalStatus.IN_PROGRESS;
     }
 
-    
+
     public String getGoalId() { return goalId; }
     public String getGoalName() { return goalName; }
     public double getTargetAmount() { return targetAmount; }

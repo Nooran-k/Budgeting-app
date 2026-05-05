@@ -11,7 +11,7 @@ public class BudgetController {
     private List<Budget> budgets;
     private BudgetView view;
 
-    
+
     public BudgetController(BudgetView view) {
         this.view = view;
         this.budgets = new ArrayList<>();
@@ -38,7 +38,7 @@ public class BudgetController {
         view.showSuccess("Budget created successfully!");
     }
 
-  
+
     public void onExpenseAdded(String category, double amount) {
 
         Budget budget = findByCategory(category);
@@ -60,20 +60,20 @@ public class BudgetController {
         view.displayBudgets(budgets);
     }
 
-    
+
     public void loadBudgets() {
-       
+
         view.displayBudgets(budgets);
     }
 
-  
+
     private Budget findByCategory(String category) {
         for (Budget b : budgets) {
             if (b.getCategory().equals(category)) {
                 return b;
             }
         }
-        return null; 
+        return null;
     }
 
 

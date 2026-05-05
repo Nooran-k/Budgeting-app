@@ -10,32 +10,41 @@ public class LoginPanel extends JPanel {
 
     public LoginPanel(MainFrame frame) {
 
-        setLayout(new GridBagLayout()); // center everything
+        setLayout(new GridBagLayout());
         setBackground(Color.white);
 
         JPanel form = new JPanel();
         form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
         form.setBackground(Color.white);
 
-        JTextField email = new JTextField();
-        JPasswordField pass = new JPasswordField();
+        JTextField     email = new JTextField();
+        JPasswordField pass  = new JPasswordField();
 
-        JLabel msg = new JLabel();
+        JLabel msg = new JLabel(" ");   // space so it reserves height
         msg.setForeground(Color.RED);
+        msg.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // ── Buttons ──────────────────────────────────────────────────────────
         JButton login = new JButton("Login");
-        login.setForeground(Color.white);
-        login.setBackground(new Color(15, 188, 19));
-        login.setFocusPainted(false);
+        styleButton(login);
 
-        // consistent field size
+        JButton back = new JButton("← Back");
+        back.setAlignmentX(Component.CENTER_ALIGNMENT);
+        back.setFocusPainted(false);
+        back.setBorderPainted(false);
+        back.setContentAreaFilled(false);
+        back.setForeground(new Color(100, 100, 100));
+        back.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        // ── Field sizes ───────────────────────────────────────────────────────
         Dimension fieldSize = new Dimension(200, 30);
         email.setMaximumSize(fieldSize);
         pass.setMaximumSize(fieldSize);
 
-        login.setAlignmentX(Component.CENTER_ALIGNMENT);
-
+        // ── Actions ───────────────────────────────────────────────────────────
         login.addActionListener(e -> {
+            msg.setText(" ");           // clear previous error before trying
+
             User user = AuthController.login(
                     email.getText(),
                     new String(pass.getPassword())
@@ -48,7 +57,9 @@ public class LoginPanel extends JPanel {
             }
         });
 
-        // layout (label ABOVE field)
+        back.addActionListener(e -> frame.showScreen("welcome"));
+
+        // ── Layout ────────────────────────────────────────────────────────────
         form.add(new JLabel("Email"));
         form.add(email);
         form.add(Box.createVerticalStrut(10));
@@ -58,9 +69,19 @@ public class LoginPanel extends JPanel {
         form.add(Box.createVerticalStrut(15));
 
         form.add(login);
-        form.add(Box.createVerticalStrut(10));
+        form.add(Box.createVerticalStrut(8));
         form.add(msg);
+        form.add(Box.createVerticalStrut(8));
+        form.add(back);
 
         add(form);
+    }
+
+    private void styleButton(JButton btn) {
+        btn.setForeground(Color.white);
+        btn.setBackground(new Color(15, 188, 19));
+        btn.setFocusPainted(false);
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btn.setMaximumSize(new Dimension(200, 35));
     }
 }

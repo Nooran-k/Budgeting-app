@@ -9,36 +9,45 @@ public class SignupPanel extends JPanel {
 
     public SignupPanel(MainFrame frame) {
 
-        setLayout(new GridBagLayout()); // centers everything
+        setLayout(new GridBagLayout());
         setBackground(Color.white);
 
         JPanel form = new JPanel();
         form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
         form.setBackground(Color.white);
 
-        // Fields
-        JTextField name = new JTextField();
-        JTextField email = new JTextField();
-        JPasswordField pass = new JPasswordField();
+        JTextField     name    = new JTextField();
+        JTextField     email   = new JTextField();
+        JPasswordField pass    = new JPasswordField();
         JPasswordField confirm = new JPasswordField();
 
-        JLabel msg = new JLabel();
+        JLabel msg = new JLabel(" ");   // space so it reserves height
         msg.setForeground(Color.RED);
+        msg.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JButton create = new JButton("Create");
-        create.setForeground(Color.white);
-        create.setBackground(new Color(15, 188, 19));
+        // ── Buttons ───────────────────────────────────────────────────────────
+        JButton create = new JButton("Create Account");
+        styleButton(create);
 
-        // style inputs
+        JButton back = new JButton("← Back");
+        back.setAlignmentX(Component.CENTER_ALIGNMENT);
+        back.setFocusPainted(false);
+        back.setBorderPainted(false);
+        back.setContentAreaFilled(false);
+        back.setForeground(new Color(100, 100, 100));
+        back.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        // ── Field sizes ───────────────────────────────────────────────────────
         Dimension fieldSize = new Dimension(200, 30);
         name.setMaximumSize(fieldSize);
         email.setMaximumSize(fieldSize);
         pass.setMaximumSize(fieldSize);
         confirm.setMaximumSize(fieldSize);
 
-        create.setAlignmentX(Component.CENTER_ALIGNMENT);
-
+        // ── Actions ───────────────────────────────────────────────────────────
         create.addActionListener(e -> {
+            msg.setText(" ");           // clear previous error before trying
+
             String result = AuthController.register(
                     name.getText(),
                     email.getText(),
@@ -47,13 +56,15 @@ public class SignupPanel extends JPanel {
             );
 
             if (result.equals("SUCCESS")) {
-                frame.showDashboard(name.getText());
+                frame.showDashboard(name.getText().trim());
             } else {
                 msg.setText(result);
             }
         });
 
-        // Add components (label ABOVE field)
+        back.addActionListener(e -> frame.showScreen("welcome"));
+
+        // ── Layout ────────────────────────────────────────────────────────────
         form.add(new JLabel("Name"));
         form.add(name);
         form.add(Box.createVerticalStrut(10));
@@ -71,9 +82,19 @@ public class SignupPanel extends JPanel {
         form.add(Box.createVerticalStrut(15));
 
         form.add(create);
-        form.add(Box.createVerticalStrut(10));
+        form.add(Box.createVerticalStrut(8));
         form.add(msg);
+        form.add(Box.createVerticalStrut(8));
+        form.add(back);
 
         add(form);
+    }
+
+    private void styleButton(JButton btn) {
+        btn.setForeground(Color.white);
+        btn.setBackground(new Color(15, 188, 19));
+        btn.setFocusPainted(false);
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btn.setMaximumSize(new Dimension(200, 35));
     }
 }
