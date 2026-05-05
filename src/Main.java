@@ -14,9 +14,9 @@ import javax.swing.*;
 public class Main {
     public static void main(String[] args) {
         new MainFrame();
-        NotificationController notifController  = new NotificationController();
-        TransactionController  txController     = new TransactionController(budgetController);
+       NotificationController notifController  = new NotificationController();
         BudgetController       budgetController = new BudgetController(notifController);
+        TransactionController  txController     = new TransactionController(budgetController);
         GoalController         goalController   = new GoalController(notifController);
         ReportController       reportController = new ReportController();
          SwingUtilities.invokeLater(() -> {
