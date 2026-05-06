@@ -51,12 +51,12 @@ public class LoginPanel extends JPanel {
             );
 
             if (user != null) {
-                frame.showDashboard(user.getName());
+                frame.showDashboard(user);
+
             } else {
                 msg.setText("Invalid email or password");
             }
         });
-
         back.addActionListener(e -> frame.showScreen("welcome"));
 
 //layout

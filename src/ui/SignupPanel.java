@@ -1,5 +1,6 @@
 package ui;
 
+import model.User;
 import service.AuthController;
 
 import javax.swing.*;
@@ -56,7 +57,13 @@ public class SignupPanel extends JPanel {
             );
 
             if (result.equals("SUCCESS")) {
-                frame.showDashboard(name.getText().trim());
+
+                User newUser = new User(
+                        name.getText().trim(),
+                        email.getText().trim(),
+                        new String(pass.getPassword())
+                );
+                frame.showDashboard(newUser);
             } else {
                 msg.setText(result);
             }
