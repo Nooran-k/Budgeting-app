@@ -7,7 +7,7 @@ public class Transaction implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int             transactionId;
-    private String          userEmail;      // changed from userId
+    private String          userEmail;    
     private double          amount;
     private TransactionType type;
     private int             categoryId;
