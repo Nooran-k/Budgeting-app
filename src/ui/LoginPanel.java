@@ -1,7 +1,7 @@
 package ui;
 
-import model.User;
 import service.AuthController;
+import model.User;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,79 +9,87 @@ import java.awt.*;
 public class LoginPanel extends JPanel {
 
     public LoginPanel(MainFrame frame) {
-
         setLayout(new GridBagLayout());
-        setBackground(Color.white);
+        setBackground(Color.WHITE);
 
         JPanel form = new JPanel();
         form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
-        form.setBackground(Color.white);
+        form.setBackground(Color.WHITE);
+        form.setBorder(BorderFactory.createTitledBorder("Log In"));
 
-        JTextField     email = new JTextField();
-        JPasswordField pass  = new JPasswordField();
+        // Fields
+        JTextField txtEmail = new JTextField();
+        JPasswordField txtPass = new JPasswordField();
 
-        JLabel msg = new JLabel(" ");
-        msg.setForeground(Color.RED);
-        msg.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // Bigger size
+        txtEmail.setPreferredSize(new Dimension(300, 40));
+        txtPass.setPreferredSize(new Dimension(300, 40));
 
- //Buttons
-        JButton login = new JButton("Login");
-        styleButton(login);
+        // Bigger text
+        txtEmail.setFont(new Font("Arial", Font.PLAIN, 16));
+        txtPass.setFont(new Font("Arial", Font.PLAIN, 16));
 
-        JButton back = new JButton("← Back");
-        back.setAlignmentX(Component.CENTER_ALIGNMENT);
-        back.setFocusPainted(false);
-        back.setBorderPainted(false);
-        back.setContentAreaFilled(false);
-        back.setForeground(new Color(100, 100, 100));
-        back.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        JLabel lblMsg = new JLabel(" ");
+        lblMsg.setForeground(Color.RED);
 
-//Field sizes
-        Dimension fieldSize = new Dimension(200, 30);
-        email.setMaximumSize(fieldSize);
-        pass.setMaximumSize(fieldSize);
+        JButton btnLogin = makeBtn("Log In");
 
-//Actions
-        login.addActionListener(e -> {
-            msg.setText(" ");           // clear the error message before trying again
+        JButton btnBack = new JButton("← Back");
+        btnBack.setFocusPainted(false);
+        btnBack.setBorderPainted(false);
+        btnBack.setContentAreaFilled(false);
 
-            User user = AuthController.login(
-                    email.getText(),
-                    new String(pass.getPassword())
-            );
-
-            if (user != null) {
-                frame.showDashboard(user);
-
-            } else {
-                msg.setText("Invalid email or password");
-            }
-        });
-        back.addActionListener(e -> frame.showScreen("welcome"));
-
-//layout
-        form.add(new JLabel("Email"));
-        form.add(email);
+        // Add components with spacing
+        form.add(labeled("Email:", txtEmail));
         form.add(Box.createVerticalStrut(10));
 
-        form.add(new JLabel("Password"));
-        form.add(pass);
-        form.add(Box.createVerticalStrut(15));
+        form.add(labeled("Password:", txtPass));
+        form.add(Box.createVerticalStrut(10));
 
-        form.add(login);
-        form.add(Box.createVerticalStrut(8));
-        form.add(msg);
-        form.add(Box.createVerticalStrut(8));
-        form.add(back);
+        form.add(lblMsg);
+        form.add(Box.createVerticalStrut(10));
+
+        form.add(btnLogin);
+        form.add(Box.createVerticalStrut(10));
+
+        form.add(btnBack);
+
+        // Actions
+        btnLogin.addActionListener(e -> {
+            lblMsg.setText(" ");
+            User user = AuthController.login(
+                    txtEmail.getText(),
+                    new String(txtPass.getPassword()));
+
+            if (user != null) frame.showDashboard(user);
+            else lblMsg.setText("Invalid email or password.");
+        });
+
+        btnBack.addActionListener(e -> frame.showScreen("welcome"));
 
         add(form);
     }
 
-    private void styleButton(JButton btn) {
-        btn.setForeground(Color.white);
-        btn.setBackground(new Color(15, 188, 19));
-        btn.setFocusPainted(false);
-        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btn.setMaximumSize(new Dimension(200, 35));
+    private JPanel labeled(String label, JComponent field) {
+        JPanel p = new JPanel(new BorderLayout(10, 5));
+        p.setBackground(Color.WHITE);
+
+        JLabel lbl = new JLabel(label);
+        lbl.setPreferredSize(new Dimension(80, 40)); // align labels
+
+        p.add(lbl, BorderLayout.WEST);
+        p.add(field, BorderLayout.CENTER);
+
+        return p;
+    }
+
+    private JButton makeBtn(String text) {
+        JButton b = new JButton(text);
+        b.setBackground(new Color(15, 188, 19));
+        b.setForeground(Color.WHITE);
+        b.setFocusPainted(false);
+        b.setFont(new Font("Arial", Font.BOLD, 14));
+        b.setPreferredSize(new Dimension(300, 40));
+        return b;
     }
 }

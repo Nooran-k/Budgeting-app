@@ -6,45 +6,34 @@ import java.awt.*;
 public class WelcomePanel extends JPanel {
 
     public WelcomePanel(MainFrame frame) {
-
         setLayout(new GridBagLayout());
-        setBackground(Color.white);
+        setBackground(Color.WHITE);
 
-        JPanel box = new JPanel();
-        box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
-        box.setBackground(Color.white);
+        JPanel box = new JPanel(new GridLayout(3, 1, 0, 15));
+        box.setBackground(Color.WHITE);
 
-        JButton signup = new JButton("Sign Up");
-        JButton login = new JButton("Log In");
+        JLabel title = new JLabel("Budget App", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 22));
+        box.add(title);
 
-        // style
-        signup.setForeground(Color.white);
-        login.setForeground(Color.white);
-        signup.setBackground(new Color(15, 188, 19));
-        login.setBackground(new Color(15, 188, 19));
+        JButton btnSignup = makeBtn("Sign Up");
+        JButton btnLogin  = makeBtn("Log In");
 
-        signup.setFocusPainted(false);
-        login.setFocusPainted(false);
+        btnSignup.addActionListener(e -> frame.showScreen("signup"));
+        btnLogin .addActionListener(e -> frame.showScreen("login"));
 
-        signup.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        login.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-
-        // same width
-        Dimension size = new Dimension(200, 40);
-        signup.setMaximumSize(size);
-        login.setMaximumSize(size);
-
-        signup.setAlignmentX(Component.CENTER_ALIGNMENT);
-        login.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        signup.addActionListener(e -> frame.showScreen("signup"));
-        login.addActionListener(e -> frame.showScreen("login"));
-
-        // layout (vertical)
-        box.add(signup);
-        box.add(Box.createVerticalStrut(15));
-        box.add(login);
-
+        box.add(btnSignup);
+        box.add(btnLogin);
         add(box);
+    }
+
+    private JButton makeBtn(String text) {
+        JButton b = new JButton(text);
+        b.setBackground(new Color(15, 188, 19));
+        b.setForeground(Color.WHITE);
+        b.setFocusPainted(false);
+        b.setFont(new Font("Arial", Font.BOLD, 14));
+        b.setPreferredSize(new Dimension(200, 40));
+        return b;
     }
 }
