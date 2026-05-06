@@ -2,6 +2,7 @@ package view;
 
 import controller.NotificationController;
 import controller.TransactionController;
+import model.Notification;
 import model.Transaction;
 import model.TransactionType;
 
@@ -14,7 +15,7 @@ public class AddTransactionView extends JPanel {
 
     private final TransactionController  tc;
     private final NotificationController nc;
-    private final int userId = 1;
+    private final String userEmail;
 
     private JTextField        txtAmount;
     private JComboBox<String> cbType;
@@ -28,10 +29,10 @@ public class AddTransactionView extends JPanel {
         "Bills", "Salary", "Other"
     };
 
-    public AddTransactionView(TransactionController tc,
-                              NotificationController nc) {
-        this.tc = tc;
-        this.nc = nc;
+    public AddTransactionView(TransactionController tc, NotificationController nc,String userEmail) {
+        this.tc        = tc;
+        this.nc        = nc;
+        this.userEmail = userEmail;
         build();
         refresh();
     }
@@ -68,7 +69,6 @@ public class AddTransactionView extends JPanel {
 
         add(form, BorderLayout.NORTH);
 
-    
         tableModel = new DefaultTableModel(
             new String[]{"ID","Type","Amount","Category","Date"}, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
@@ -88,10 +88,10 @@ public class AddTransactionView extends JPanel {
         }
 
         TransactionType type = cbType.getSelectedItem().equals("EXPENSE")
-                               ? TransactionType.EXPENSE
-                               : TransactionType.INCOME;
+         ? TransactionType.EXPENSE : TransactionType.INCOME;
 
-        Transaction t = tc.addTransaction(userId, amount, type,
+        Transaction t = tc.addTransaction(
+                userEmail, amount, type,
                 cbCategory.getSelectedIndex(),
                 (String) cbCategory.getSelectedItem(),
                 txtDesc.getText().trim(), "Cash");
@@ -108,19 +108,19 @@ public class AddTransactionView extends JPanel {
         txtDesc.setText("");
         refresh();
 
-        
-        var alert = nc.getLatestUnread(userId);
+        Notification alert = nc.getLatestUnread(userEmail);
         if (alert != null) {
             JOptionPane.showMessageDialog(this,
                 alert.getMessage(), "Budget Alert",
                 JOptionPane.WARNING_MESSAGE);
             alert.markAsRead();
+            data.Database.markNotificationRead(alert.getNotificationId());
         }
     }
 
     private void refresh() {
         tableModel.setRowCount(0);
-        List<Transaction> list = tc.getTransactionsByUser(userId);
+        List<Transaction> list = tc.getTransactionsByUser(userEmail);
         for (Transaction t : list) {
             tableModel.addRow(new Object[]{
                 t.getTransactionId(),
