@@ -9,28 +9,40 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * GoalView is responsible for managing financial goals.
+ * It allows users to create goals, track progress,
+ * and add savings to existing goals.
+ */
 public class GoalView extends JPanel {
 
     private final GoalController gc;
-    private final int userId = 1;
+    private final String userEmail;
 
     private JTextField txtName;
     private JTextField txtTarget;
     private JTextField txtSaved;
-    private JLabel     lblMsg;
+    private JLabel lblMsg;
     private DefaultTableModel tableModel;
 
-    public GoalView(GoalController gc) {
+    /**
+     * Constructor initializes the goal view.
+     *
+     * @param gc Goal controller
+     * @param userEmail Logged-in user's email
+     */
+    public GoalView(GoalController gc, String userEmail) {
         this.gc = gc;
+        this.userEmail = userEmail;
         build();
         refresh();
     }
 
+    /** Builds UI components */
     private void build() {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-       
         JPanel form = new JPanel(new GridLayout(5, 2, 5, 5));
         form.setBorder(BorderFactory.createTitledBorder("New Goal"));
 
@@ -55,22 +67,23 @@ public class GoalView extends JPanel {
 
         add(form, BorderLayout.NORTH);
 
-       
         tableModel = new DefaultTableModel(
-            new String[]{"ID","Name","Target","Saved","Progress%","Status"}, 0) {
+                new String[]{"ID","Name","Target","Saved","Progress%","Status"}, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
+
         JTable table = new JTable(tableModel);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        
         JButton btnAdd = new JButton("Add Savings to Selected Goal");
         btnAdd.addActionListener(e -> addSavings(table));
         add(btnAdd, BorderLayout.SOUTH);
     }
 
+    /** Creates a new financial goal */
     private void create() {
         String name = txtName.getText().trim();
+
         if (name.isEmpty()) {
             lblMsg.setForeground(Color.RED);
             lblMsg.setText("Enter a goal name.");
@@ -87,10 +100,8 @@ public class GoalView extends JPanel {
             return;
         }
 
-        
-        LocalDate deadline = LocalDate.now().plusMonths(6);
-
-        FinancialGoal g = gc.createGoal(userId, name, target, saved, deadline);
+        FinancialGoal g = gc.createGoal(userEmail, name, target, saved,
+                LocalDate.now().plusMonths(6));
 
         if (g == null) {
             lblMsg.setForeground(Color.RED);
@@ -103,21 +114,29 @@ public class GoalView extends JPanel {
         txtName.setText("");
         txtTarget.setText("");
         txtSaved.setText("0");
+
         refresh();
     }
 
+    /**
+     * Adds savings to a selected goal.
+     *
+     * @param table JTable containing goals
+     */
     private void addSavings(JTable table) {
         int row = table.getSelectedRow();
+
         if (row == -1) {
             JOptionPane.showMessageDialog(this, "Select a goal first.");
             return;
         }
 
-        int    goalId = (int)    tableModel.getValueAt(row, 0);
-        String name   = (String) tableModel.getValueAt(row, 1);
+        int goalId = (int) tableModel.getValueAt(row, 0);
+        String name = (String) tableModel.getValueAt(row, 1);
 
         String input = JOptionPane.showInputDialog(
                 this, "Amount to add to \"" + name + "\" (EGP):");
+
         if (input == null || input.trim().isEmpty()) return;
 
         double amount;
@@ -128,21 +147,24 @@ public class GoalView extends JPanel {
             return;
         }
 
-        gc.updateGoalProgress(goalId, userId, amount);
+        gc.updateGoalProgress(goalId, userEmail, amount);
         refresh();
     }
 
+    /** Refreshes goal table */
     private void refresh() {
         tableModel.setRowCount(0);
-        List<FinancialGoal> list = gc.getAllGoals(userId);
+
+        List<FinancialGoal> list = gc.getAllGoals(userEmail);
+
         for (FinancialGoal g : list) {
             tableModel.addRow(new Object[]{
-                g.getGoalId(),
-                g.getName(),
-                String.format("%.2f", g.getTargetAmount()),
-                String.format("%.2f", g.getCurrentAmount()),
-                String.format("%.1f%%", g.calculateProgressPercentage()),
-                g.getStatus()
+                    g.getGoalId(),
+                    g.getName(),
+                    String.format("%.2f", g.getTargetAmount()),
+                    String.format("%.2f", g.getCurrentAmount()),
+                    String.format("%.1f%%", g.calculateProgressPercentage()),
+                    g.getStatus()
             });
         }
     }

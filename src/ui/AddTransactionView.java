@@ -11,32 +11,48 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * AddTransactionView is responsible for displaying the UI
+ * that allows users to add new financial transactions
+ * and view their transaction history.
+ */
 public class AddTransactionView extends JPanel {
 
-    private final TransactionController  tc;
+    private final TransactionController tc;
     private final NotificationController nc;
     private final String userEmail;
 
-    private JTextField        txtAmount;
+    private JTextField txtAmount;
     private JComboBox<String> cbType;
     private JComboBox<String> cbCategory;
-    private JTextField        txtDesc;
-    private JLabel            lblMsg;
+    private JTextField txtDesc;
+    private JLabel lblMsg;
     private DefaultTableModel tableModel;
 
+    /** List of predefined categories */
     private final String[] CATEGORIES = {
         "Food", "Transport", "Groceries",
         "Bills", "Salary", "Other"
     };
 
-    public AddTransactionView(TransactionController tc, NotificationController nc,String userEmail) {
-        this.tc        = tc;
-        this.nc        = nc;
+    /**
+     * Constructor to initialize the transaction view.
+     *
+     * @param tc Transaction controller
+     * @param nc Notification controller
+     * @param userEmail Logged-in user's email
+     */
+    public AddTransactionView(TransactionController tc,
+                              NotificationController nc,
+                              String userEmail) {
+        this.tc = tc;
+        this.nc = nc;
         this.userEmail = userEmail;
         build();
         refresh();
     }
 
+    /** Builds the UI components */
     private void build() {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -70,13 +86,15 @@ public class AddTransactionView extends JPanel {
         add(form, BorderLayout.NORTH);
 
         tableModel = new DefaultTableModel(
-            new String[]{"ID","Type","Amount","Category","Date"}, 0) {
+                new String[]{"ID","Type","Amount","Category","Date"}, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
+
         JTable table = new JTable(tableModel);
         add(new JScrollPane(table), BorderLayout.CENTER);
     }
 
+    /** Handles saving a transaction */
     private void save() {
         double amount;
         try {
@@ -88,7 +106,8 @@ public class AddTransactionView extends JPanel {
         }
 
         TransactionType type = cbType.getSelectedItem().equals("EXPENSE")
-         ? TransactionType.EXPENSE : TransactionType.INCOME;
+                ? TransactionType.EXPENSE
+                : TransactionType.INCOME;
 
         Transaction t = tc.addTransaction(
                 userEmail, amount, type,
@@ -111,23 +130,25 @@ public class AddTransactionView extends JPanel {
         Notification alert = nc.getLatestUnread(userEmail);
         if (alert != null) {
             JOptionPane.showMessageDialog(this,
-                alert.getMessage(), "Budget Alert",
-                JOptionPane.WARNING_MESSAGE);
+                    alert.getMessage(), "Budget Alert",
+                    JOptionPane.WARNING_MESSAGE);
             alert.markAsRead();
             data.Database.markNotificationRead(alert.getNotificationId());
         }
     }
 
+    /** Refreshes the transaction table */
     private void refresh() {
         tableModel.setRowCount(0);
         List<Transaction> list = tc.getTransactionsByUser(userEmail);
+
         for (Transaction t : list) {
             tableModel.addRow(new Object[]{
-                t.getTransactionId(),
-                t.getType(),
-                String.format("%.2f", t.getAmount()),
-                t.getCategoryName(),
-                t.getDate().toLocalDate()
+                    t.getTransactionId(),
+                    t.getType(),
+                    String.format("%.2f", t.getAmount()),
+                    t.getCategoryName(),
+                    t.getDate().toLocalDate()
             });
         }
     }

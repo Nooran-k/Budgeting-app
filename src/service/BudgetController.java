@@ -1,109 +1,99 @@
+/**
+ * Controller responsible for managing budgets.
+ * 
+ * Handles:
+ * - Creating budgets
+ * - Tracking expenses
+ * - Retrieving monthly budgets
+ */
 package controller;
 
-import data.DataStore;
+import data.Database;
 import model.Budget;
 import model.BudgetStatus;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 public class BudgetController {
 
-    private List<Budget>              budgets;
-    private NotificationController    notifController;
+    private final NotificationController nc;
 
-    public BudgetController(NotificationController notifController) {
-        this.notifController = notifController;
-        this.budgets = DataStore.loadBudgets();
+    /**
+     * Constructor.
+     *
+     * @param nc notification controller
+     */
+    public BudgetController(NotificationController nc) {
+        this.nc = nc;
     }
 
-    
-    public Budget createBudget(int userId, int categoryId, String categoryName,
-                               double limitAmount, LocalDate startDate,
-                               LocalDate endDate, int alertThreshold) {
-        
-        boolean duplicate = budgets.stream().anyMatch(b ->
-                b.getUserId()    == userId
-             && b.getCategoryId() == categoryId
-             && !b.getStartDate().isAfter(endDate)     
-             && !b.getEndDate().isBefore(startDate));
+    /**
+     * Creates a new budget.
+     *
+     * @param userEmail      user email
+     * @param categoryId     category ID
+     * @param categoryName   category name
+     * @param limitAmount    budget limit
+     * @param startDate      start date
+     * @param endDate        end date
+     * @param alertThreshold alert percentage threshold
+     * @return Budget object or null if duplicate/failed
+     */
+    public Budget createBudget(String userEmail, int categoryId,
+                               String categoryName, double limitAmount,
+                               LocalDate startDate, LocalDate endDate,
+                               int alertThreshold) {
 
-        if (duplicate) return null; 
+        if (Database.budgetExists(userEmail, categoryId, startDate, endDate))
+            return null;
 
-       
-        int id = DataStore.nextBudgetId();
-        Budget budget = new Budget(id, userId, categoryId, categoryName,
-                                   limitAmount, startDate, endDate, alertThreshold);
-        budgets.add(budget);
-        DataStore.saveBudgets(budgets);
-        return budget;
+        Budget b = new Budget(0, userEmail, categoryId, categoryName,
+                              limitAmount, startDate, endDate, alertThreshold);
+
+        if (!Database.saveBudget(b)) return null;
+
+        return b;
     }
 
-   
-    public boolean editBudget(int budgetId, double newLimit, int newThreshold) {
-        for (Budget b : budgets) {
-            if (b.getBudgetId() == budgetId) {
-                b.setLimitAmount(newLimit);
-                b.setAlertThreshold(newThreshold);
-                DataStore.saveBudgets(budgets);
-                return true;
-            }
-        }
-        return false;
-    }
+    /**
+     * Tracks budget usage after adding an expense.
+     *
+     * @param userEmail user email
+     * @param categoryId category ID
+     * @param amount expense amount
+     */
+    public void trackBudgetUsage(String userEmail, int categoryId,
+                                 double amount) {
 
-   
-    public boolean deleteBudget(int budgetId) {
-        boolean removed = budgets.removeIf(b -> b.getBudgetId() == budgetId);
-        if (removed) DataStore.saveBudgets(budgets);
-        return removed;
-    }
-
-   
-    public void trackBudgetUsage(int userId, int categoryId, double amount) {
-       
         LocalDate today = LocalDate.now();
-        Optional<Budget> match = budgets.stream().filter(b ->
-                b.getUserId()    == userId
-             && b.getCategoryId() == categoryId
-             && !today.isBefore(b.getStartDate())
-             && !today.isAfter(b.getEndDate()))
-            .findFirst();
 
-        if (match.isEmpty()) return; 
+        Budget b = Database.findActiveBudget(userEmail, categoryId, today);
+        if (b == null) return;
 
-        Budget b = match.get();
         BudgetStatus before = b.getStatus();
 
         b.addExpense(amount);
-        DataStore.saveBudgets(budgets); 
+        Database.updateBudget(b);
 
-        if (b.checkIfAlertNeeded()) {
-            boolean exceeded = b.getStatus() == BudgetStatus.EXCEEDED;
-           
-            if (b.getStatus() != before || before == BudgetStatus.ON_TRACK) {
-                notifController.pushBudgetAlert(userId, b.getCategoryName(),
-                     b.calculateUsagePercentage(), exceeded);
-            }
+        if (b.checkIfAlertNeeded() && b.getStatus() != before) {
+            nc.pushBudgetAlert(userEmail, b.getCategoryName(),
+                               b.calculateUsagePercentage(),
+                               b.getStatus() == BudgetStatus.EXCEEDED);
         }
     }
 
-   
-    public List<Budget> getBudgetForMonth(int userId, int month, int year) {
-        return budgets.stream().filter(b -> {
-            if (b.getUserId() != userId) return false;
-            LocalDate start = b.getStartDate();
-            return start.getMonthValue() == month && start.getYear() == year;
-        }).collect(Collectors.toList());
-    }
-
-
-    public List<Budget> getAllBudgets(int userId) {
-        return budgets.stream()
-                .filter(b -> b.getUserId() == userId)
-                .collect(Collectors.toList());
+    /**
+     * Returns budgets for a specific month.
+     *
+     * @param userEmail user email
+     * @param month     month number
+     * @param year      year
+     * @return list of budgets
+     */
+    public List<Budget> getBudgetForMonth(String userEmail,
+                                          int month, int year) {
+        return Database.loadBudgets(userEmail, month, year);
     }
 }

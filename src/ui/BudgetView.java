@@ -9,32 +9,44 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * BudgetView is responsible for managing user budgets.
+ * It allows users to create new budgets and view existing ones.
+ */
 public class BudgetView extends JPanel {
 
     private final BudgetController bc;
-    private final int userId = 1;
+    private final String userEmail;
 
     private JComboBox<String> cbCategory;
-    private JTextField        txtAmount;
-    private JLabel            lblMsg;
+    private JTextField txtAmount;
+    private JLabel lblMsg;
     private DefaultTableModel tableModel;
 
+    /** List of available categories */
     private final String[] CATEGORIES = {
         "Food", "Transport", "Groceries",
         "Bills", "Healthcare", "Other"
     };
 
-    public BudgetView(BudgetController bc) {
+    /**
+     * Constructor initializes the budget view.
+     *
+     * @param bc Budget controller
+     * @param userEmail Logged-in user's email
+     */
+    public BudgetView(BudgetController bc, String userEmail) {
         this.bc = bc;
+        this.userEmail = userEmail;
         build();
         refresh();
     }
 
+    /** Builds UI components */
     private void build() {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-       
         JPanel form = new JPanel(new GridLayout(4, 2, 5, 5));
         form.setBorder(BorderFactory.createTitledBorder("New Budget"));
 
@@ -55,15 +67,16 @@ public class BudgetView extends JPanel {
 
         add(form, BorderLayout.NORTH);
 
-        
         tableModel = new DefaultTableModel(
-            new String[]{"ID","Category","Limit","Spent","Remaining","Status"}, 0) {
+                new String[]{"ID","Category","Limit","Spent","Remaining","Status"}, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
+
         JTable table = new JTable(tableModel);
         add(new JScrollPane(table), BorderLayout.CENTER);
     }
 
+    /** Creates a new budget */
     private void create() {
         double amount;
         try {
@@ -74,18 +87,18 @@ public class BudgetView extends JPanel {
             return;
         }
 
-        LocalDate now   = LocalDate.now();
+        LocalDate now = LocalDate.now();
         LocalDate start = now.withDayOfMonth(1);
-        LocalDate end   = now.withDayOfMonth(now.lengthOfMonth());
+        LocalDate end = now.withDayOfMonth(now.lengthOfMonth());
 
-        Budget b = bc.createBudget(userId,
+        Budget b = bc.createBudget(userEmail,
                 cbCategory.getSelectedIndex(),
                 (String) cbCategory.getSelectedItem(),
                 amount, start, end, 80);
 
         if (b == null) {
             lblMsg.setForeground(Color.RED);
-            lblMsg.setText("Budget already exists for this category.");
+            lblMsg.setText("Budget already exists.");
             return;
         }
 
@@ -95,19 +108,22 @@ public class BudgetView extends JPanel {
         refresh();
     }
 
+    /** Refreshes the budget table */
     private void refresh() {
         tableModel.setRowCount(0);
         LocalDate now = LocalDate.now();
+
         List<Budget> list = bc.getBudgetForMonth(
-                userId, now.getMonthValue(), now.getYear());
+                userEmail, now.getMonthValue(), now.getYear());
+
         for (Budget b : list) {
             tableModel.addRow(new Object[]{
-                b.getBudgetId(),
-                b.getCategoryName(),
-                String.format("%.2f", b.getLimitAmount()),
-                String.format("%.2f", b.getSpentAmount()),
-                String.format("%.2f", b.calculateRemaining()),
-                b.getStatus()
+                    b.getBudgetId(),
+                    b.getCategoryName(),
+                    String.format("%.2f", b.getLimitAmount()),
+                    String.format("%.2f", b.getSpentAmount()),
+                    String.format("%.2f", b.calculateRemaining()),
+                    b.getStatus()
             });
         }
     }

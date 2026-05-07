@@ -1,6 +1,9 @@
+/**
+ * Controller responsible for generating financial reports.
+ */
 package controller;
 
-import data.DataStore;
+import data.Database;
 import model.Report;
 import model.ReportType;
 import model.Transaction;
@@ -12,77 +15,70 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
 public class ReportController {
 
-    
     private static int nextReportId = 1;
 
-    public Report generateReport(int userId, ReportType type,
-                                 LocalDate startDate, LocalDate endDate) {
-       
-        List<Transaction> all = DataStore.loadTransactions();
-        List<Transaction> filtered = all.stream()
-                .filter(t -> t.getUserId() == userId)
-                .filter(t -> !t.getDate().toLocalDate().isBefore(startDate))
-                .filter(t -> !t.getDate().toLocalDate().isAfter(endDate))
-                .collect(Collectors.toList());
+    /**
+     * Generates a monthly report.
+     */
+    public Report generateMonthlyReport(String userEmail, int month, int year) {
 
-        
-        Map<String, Double> categoryTotals = getExpensesByCategory(filtered);
-        double totalIncome   = getTotalIncome(filtered);
-        double totalExpenses = getTotalExpenses(filtered);
-
-        return new Report(nextReportId++, userId, startDate, endDate,
-                          type, categoryTotals, totalIncome, totalExpenses);
-    }
-
-    
-    public Report generateMonthlyReport(int userId, int month, int year) {
         LocalDate start = LocalDate.of(year, month, 1);
-        LocalDate end   = start.withDayOfMonth(start.lengthOfMonth());
-        return generateReport(userId, ReportType.MONTHLY_SUMMARY, start, end);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+        return generate(userEmail, start, end);
     }
 
-    
-    public Report generateCustomReport(int userId,
-                                       LocalDate startDate, LocalDate endDate) {
-        return generateReport(userId, ReportType.CUSTOM_RANGE, startDate, endDate);
+    /**
+     * Generates a custom report.
+     */
+    public Report generateCustomReport(String userEmail,
+                                       LocalDate start, LocalDate end) {
+
+        return generate(userEmail, start, end);
     }
 
-   
-    public Map<String, Double> getExpensesByCategory(List<Transaction> transactions) {
-        Map<String, Double> result = new HashMap<>();
-        for (Transaction t : transactions) {
+    /**
+     * Internal method to generate report.
+     */
+    private Report generate(String userEmail,
+                             LocalDate start, LocalDate end) {
+
+        List<Transaction> all = Database.loadTransactions(userEmail);
+
+        List<Transaction> filtered = all.stream()
+            .filter(t -> !t.getDate().toLocalDate().isBefore(start))
+            .filter(t -> !t.getDate().toLocalDate().isAfter(end))
+            .collect(Collectors.toList());
+
+        Map<String, Double> cats = new HashMap<>();
+
+        for (Transaction t : filtered) {
             if (t.getType() == TransactionType.EXPENSE) {
-                // merge: if category already exists, add to its total
-                result.merge(t.getCategoryName(), t.getAmount(), Double::sum);
+                cats.merge(t.getCategoryName(), t.getAmount(), Double::sum);
             }
         }
-        return result;
+
+        double income = filtered.stream()
+            .filter(t -> t.getType() == TransactionType.INCOME)
+            .mapToDouble(Transaction::getAmount).sum();
+
+        double expense = filtered.stream()
+            .filter(t -> t.getType() == TransactionType.EXPENSE)
+            .mapToDouble(Transaction::getAmount).sum();
+
+        return new Report(nextReportId++, userEmail,
+                start, end, ReportType.MONTHLY_SUMMARY,
+                cats, income, expense);
     }
 
-    
-    public double getTotalIncome(List<Transaction> transactions) {
-        return transactions.stream()
-                .filter(t -> t.getType() == TransactionType.INCOME)
-                .mapToDouble(Transaction::getAmount)
-                .sum();
-    }
+    /**
+     * Checks if data exists in a date range.
+     */
+    public boolean hasData(String userEmail,
+                           LocalDate start, LocalDate end) {
 
-   
-    public double getTotalExpenses(List<Transaction> transactions) {
-        return transactions.stream()
-                .filter(t -> t.getType() == TransactionType.EXPENSE)
-                .mapToDouble(Transaction::getAmount)
-                .sum();
-    }
-
-    
-    public boolean hasData(int userId, LocalDate startDate, LocalDate endDate) {
-        return DataStore.loadTransactions().stream()
-                .anyMatch(t -> t.getUserId() == userId
-                        && !t.getDate().toLocalDate().isBefore(startDate)
-                        && !t.getDate().toLocalDate().isAfter(endDate));
+        return Database.hasTransactions(userEmail, start, end);
     }
 }
