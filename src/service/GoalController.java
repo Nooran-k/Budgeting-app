@@ -1,77 +1,99 @@
+/**
+ * Controller responsible for managing financial goals.
+ */
 package controller;
 
-import data.DataStore;
+import data.Database;
 import model.FinancialGoal;
 import model.GoalStatus;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
-
-
 public class GoalController {
 
-    private List<FinancialGoal>    goals;
-    private NotificationController notifController;
+    private final NotificationController nc;
 
-    public GoalController(NotificationController notifController) {
-        this.notifController = notifController;
-        this.goals = DataStore.loadGoals();
+    /**
+import model.FinancialGoal;
+import model.GoalStatus;
+     * Constructor.
+     *
+     * @param nc notification controller
+     */
+    public GoalController(NotificationController nc) {
+        this.nc = nc;
     }
 
-    
-    public FinancialGoal createGoal(int userId, String name,
+    /**
+     * Creates a new financial goal.
+     *
+     * @param userEmail user email
+     * @param name goal name
+     * @param targetAmount target amount
+     * @param initialAmount initial saved amount
+     * @param deadline goal deadline
+     * @return FinancialGoal object or null if invalid
+     */
+    public FinancialGoal createGoal(String userEmail, String name,
                                     double targetAmount, double initialAmount,
                                     LocalDate deadline) {
-        
-        if (name == null || name.trim().isEmpty()) return null;
-        if (targetAmount <= 0)                     return null;
-        if (deadline.isBefore(LocalDate.now()))    return null; 
 
-        int id = DataStore.nextGoalId();
-        FinancialGoal goal = new FinancialGoal(id, userId, name,
-                                               targetAmount, initialAmount,
-                                               deadline);
-        goals.add(goal);
-        DataStore.saveGoals(goals);
-        return goal;
+        if (name == null || name.isEmpty()) return null;
+        if (targetAmount <= 0) return null;
+        if (deadline.isBefore(LocalDate.now())) return null;
+
+        FinancialGoal g = new FinancialGoal(0, userEmail, name,
+                                            targetAmount, initialAmount,
+                                            deadline);
+
+        if (!Database.saveGoal(g)) return null;
+
+        return g;
     }
 
+    /**
+     * Updates goal progress by adding contribution.
+     *
+     * @param goalId goal ID
+     * @param userEmail user email
+     * @param amount amount added
+     */
+    public void updateGoalProgress(int goalId, String userEmail, double amount) {
 
-    public void updateGoalProgress(int goalId, int userId, double amount) {
+        List<FinancialGoal> goals = Database.loadGoals(userEmail);
+
         for (FinancialGoal g : goals) {
             if (g.getGoalId() == goalId) {
+
                 g.addContribution(amount);
-                DataStore.saveGoals(goals);
+                Database.updateGoal(g);
 
                 if (g.getStatus() == GoalStatus.COMPLETED) {
-                    notifController.pushGoalCompleteAlert(userId, g.getName());
+                    nc.pushGoalCompleteAlert(userEmail, g.getName());
                 }
+
                 return;
             }
         }
     }
 
-   
+    /**
+     * Deletes a goal.
+     *
+     * @param goalId goal ID
+     * @return true if deleted
+     */
     public boolean deleteGoal(int goalId) {
-        boolean removed = goals.removeIf(g -> g.getGoalId() == goalId);
-        if (removed) DataStore.saveGoals(goals);
-        return removed;
+        return Database.deleteGoal(goalId);
     }
 
-  
-    public List<FinancialGoal> getAllGoals(int userId) {
-        return goals.stream()
-                .filter(g -> g.getUserId() == userId)
-                .collect(Collectors.toList());
-    }
-
-   
-    public double calculateProgressPercentage(int goalId) {
-        return goals.stream()
-                .filter(g -> g.getGoalId() == goalId)
-                .findFirst()
-                .map(FinancialGoal::calculateProgressPercentage)
-                .orElse(0.0);
+    /**
+     * Returns all goals for a user.
+     *
+     * @param userEmail user email
+     * @return list of goals
+     */
+    public List<FinancialGoal> getAllGoals(String userEmail) {
+        return Database.loadGoals(userEmail);
     }
 }
