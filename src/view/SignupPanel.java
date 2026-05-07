@@ -1,12 +1,24 @@
-package ui;
+package view;
 
-import service.AuthController;
+import controller.AuthController;
 
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Signup screen panel.
+ *
+ * Responsibilities:
+ * - Takes user data (name, email, password)
+ * - Validates input via AuthController
+ * - Creates account
+ * - Redirects to dashboard on success
+ */
 public class SignupPanel extends JPanel {
 
+    /**
+     * Builds signup UI.
+     */
     public SignupPanel(MainFrame frame) {
         setLayout(new GridBagLayout());
         setBackground(Color.WHITE);
@@ -16,61 +28,32 @@ public class SignupPanel extends JPanel {
         form.setBackground(Color.WHITE);
         form.setBorder(BorderFactory.createTitledBorder("Create Account"));
 
-        // Fields
         JTextField txtName = new JTextField();
         JTextField txtEmail = new JTextField();
         JPasswordField txtPass = new JPasswordField();
         JPasswordField txtConfirm = new JPasswordField();
 
-        // Bigger size
-        Dimension fieldSize = new Dimension(300, 40);
-        txtName.setPreferredSize(fieldSize);
-        txtEmail.setPreferredSize(fieldSize);
-        txtPass.setPreferredSize(fieldSize);
-        txtConfirm.setPreferredSize(fieldSize);
-
-        // Bigger text
-        Font fieldFont = new Font("Arial", Font.PLAIN, 16);
-        txtName.setFont(fieldFont);
-        txtEmail.setFont(fieldFont);
-        txtPass.setFont(fieldFont);
-        txtConfirm.setFont(fieldFont);
-
         JLabel lblMsg = new JLabel(" ");
         lblMsg.setForeground(Color.RED);
 
         JButton btnCreate = makeBtn("Create Account");
-
         JButton btnBack = new JButton("← Back");
-        btnBack.setFocusPainted(false);
-        btnBack.setBorderPainted(false);
-        btnBack.setContentAreaFilled(false);
 
-        // Add components with spacing
         form.add(labeled("Name:", txtName));
         form.add(Box.createVerticalStrut(10));
-
         form.add(labeled("Email:", txtEmail));
         form.add(Box.createVerticalStrut(10));
-
         form.add(labeled("Password:", txtPass));
         form.add(Box.createVerticalStrut(10));
-
         form.add(labeled("Confirm:", txtConfirm));
         form.add(Box.createVerticalStrut(10));
-
         form.add(lblMsg);
         form.add(Box.createVerticalStrut(10));
-
         form.add(btnCreate);
         form.add(Box.createVerticalStrut(10));
-
         form.add(btnBack);
 
-        // Actions
         btnCreate.addActionListener(e -> {
-            lblMsg.setText(" ");
-
             String result = AuthController.register(
                     txtName.getText(),
                     txtEmail.getText(),
@@ -81,8 +64,8 @@ public class SignupPanel extends JPanel {
             if (result.equals("SUCCESS")) {
                 frame.showDashboard(
                         new model.User(
-                                txtName.getText().trim(),
-                                txtEmail.getText().trim(),
+                                txtName.getText(),
+                                txtEmail.getText(),
                                 ""
                         )
                 );
@@ -96,26 +79,27 @@ public class SignupPanel extends JPanel {
         add(form);
     }
 
+    /**
+     * @param label
+     * @param field
+     * @return JPanel
+     */
     private JPanel labeled(String label, JComponent field) {
         JPanel p = new JPanel(new BorderLayout(10, 5));
         p.setBackground(Color.WHITE);
-
-        JLabel lbl = new JLabel(label);
-        lbl.setPreferredSize(new Dimension(120, 40)); // wider for "Confirm Password"
-
-        p.add(lbl, BorderLayout.WEST);
+        p.add(new JLabel(label), BorderLayout.WEST);
         p.add(field, BorderLayout.CENTER);
-
         return p;
     }
 
+    /**
+     * @param text
+     * @return JButton
+     */
     private JButton makeBtn(String text) {
         JButton b = new JButton(text);
         b.setBackground(new Color(15, 188, 19));
         b.setForeground(Color.WHITE);
-        b.setFocusPainted(false);
-        b.setFont(new Font("Arial", Font.BOLD, 14));
-        b.setPreferredSize(new Dimension(300, 40));
         return b;
     }
 }

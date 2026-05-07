@@ -1,13 +1,24 @@
-package ui;
+package view;
 
-import service.AuthController;
+import controller.AuthController;
 import model.User;
 
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * LoginPanel provides the user interface for user authentication.
+ * It allows users to enter their email and password,
+ * validates them using AuthController, and redirects
+ * to the dashboard upon successful login.
+ */
 public class LoginPanel extends JPanel {
 
+    /**
+     * Constructs the LoginPanel and initializes UI components.
+     *
+     * @param frame The main application frame used for navigation
+     */
     public LoginPanel(MainFrame frame) {
         setLayout(new GridBagLayout());
         setBackground(Color.WHITE);
@@ -17,15 +28,15 @@ public class LoginPanel extends JPanel {
         form.setBackground(Color.WHITE);
         form.setBorder(BorderFactory.createTitledBorder("Log In"));
 
-        // Fields
+        // Input Fields
         JTextField txtEmail = new JTextField();
         JPasswordField txtPass = new JPasswordField();
 
-        // Bigger size
+        // Set preferred size
         txtEmail.setPreferredSize(new Dimension(300, 40));
         txtPass.setPreferredSize(new Dimension(300, 40));
 
-        // Bigger text
+        // Set font
         txtEmail.setFont(new Font("Arial", Font.PLAIN, 16));
         txtPass.setFont(new Font("Arial", Font.PLAIN, 16));
 
@@ -39,7 +50,7 @@ public class LoginPanel extends JPanel {
         btnBack.setBorderPainted(false);
         btnBack.setContentAreaFilled(false);
 
-        // Add components with spacing
+        // Add components
         form.add(labeled("Email:", txtEmail));
         form.add(Box.createVerticalStrut(10));
 
@@ -54,28 +65,41 @@ public class LoginPanel extends JPanel {
 
         form.add(btnBack);
 
-        // Actions
+        // Login Action
         btnLogin.addActionListener(e -> {
             lblMsg.setText(" ");
+
             User user = AuthController.login(
                     txtEmail.getText(),
-                    new String(txtPass.getPassword()));
+                    new String(txtPass.getPassword())
+            );
 
-            if (user != null) frame.showDashboard(user);
-            else lblMsg.setText("Invalid email or password.");
+            if (user != null) {
+                frame.showDashboard(user);
+            } else {
+                lblMsg.setText("Invalid email or password.");
+            }
         });
 
+        // Back Action
         btnBack.addActionListener(e -> frame.showScreen("welcome"));
 
         add(form);
     }
 
+    /**
+     * Creates a labeled input field panel.
+     *
+     * @param label Text label
+     * @param field Input component
+     * @return JPanel containing label and field
+     */
     private JPanel labeled(String label, JComponent field) {
         JPanel p = new JPanel(new BorderLayout(10, 5));
         p.setBackground(Color.WHITE);
 
         JLabel lbl = new JLabel(label);
-        lbl.setPreferredSize(new Dimension(80, 40)); // align labels
+        lbl.setPreferredSize(new Dimension(80, 40));
 
         p.add(lbl, BorderLayout.WEST);
         p.add(field, BorderLayout.CENTER);
@@ -83,6 +107,12 @@ public class LoginPanel extends JPanel {
         return p;
     }
 
+    /**
+     * Creates a styled button.
+     *
+     * @param text Button text
+     * @return JButton with custom style
+     */
     private JButton makeBtn(String text) {
         JButton b = new JButton(text);
         b.setBackground(new Color(15, 188, 19));
