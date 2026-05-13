@@ -1,6 +1,6 @@
-package view;
+package ui;
 
-import controller.ReportController;
+import service.ReportController;
 import model.Report;
 
 import javax.swing.*;

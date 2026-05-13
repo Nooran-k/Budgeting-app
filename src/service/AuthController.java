@@ -5,7 +5,7 @@
  * - User registration
  * - User login
  */
-package controller;
+package service;
 
 import data.Database;
 import model.User;

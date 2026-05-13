@@ -1,6 +1,6 @@
-package view;
+package ui;
 
-import controller.AuthController;
+import service.AuthController;
 
 import javax.swing.*;
 import java.awt.*;

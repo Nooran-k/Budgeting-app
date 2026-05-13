@@ -1,7 +1,10 @@
-package view;
+package ui;
 
-import controller.*;
+import service.*;
 import model.User;
+import ui.LoginPanel;
+import ui.SignupPanel;
+import ui.WelcomePanel;
 
 import javax.swing.*;
 import java.awt.*;

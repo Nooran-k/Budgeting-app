@@ -1,7 +1,7 @@
 /**
  * Controller responsible for managing transactions.
  */
-package controller;
+package service;
 
 import data.Database;
 import model.Transaction;

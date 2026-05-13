@@ -100,10 +100,7 @@ public class FinancialGoal implements Serializable {
                  : GoalStatus.IN_PROGRESS;
     }
 
-    /** 
-     * @param a
-     * @return int
-     */
+
     // Getters
 
     public int getGoalId() { return goalId; }

@@ -1,6 +1,6 @@
-package view;
+package ui;
 
-import controller.BudgetController;
+import service.BudgetController;
 import model.Budget;
 
 import javax.swing.*;

@@ -82,10 +82,7 @@ public class Report implements Serializable {
         );
     }
 
-    /** 
-     * @param getNetSavings(
-     * @return int
-     */
+
     // Getters
 
     public int getReportId() { return reportId; }

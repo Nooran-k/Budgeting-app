@@ -1,10 +1,10 @@
-package view;
+package ui;
 
-import controller.NotificationController;
-import controller.TransactionController;
 import model.Notification;
 import model.Transaction;
 import model.TransactionType;
+import service.NotificationController;
+import service.TransactionController;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

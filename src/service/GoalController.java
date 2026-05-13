@@ -1,7 +1,7 @@
 /**
  * Controller responsible for managing financial goals.
  */
-package controller;
+package service;
 
 import data.Database;
 import model.FinancialGoal;

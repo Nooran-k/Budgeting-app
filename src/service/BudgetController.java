@@ -6,7 +6,7 @@
  * - Tracking expenses
  * - Retrieving monthly budgets
  */
-package controller;
+package service;
 
 import data.Database;
 import model.Budget;

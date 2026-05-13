@@ -51,10 +51,7 @@ public class Transaction implements Serializable {
         this.paymentMethod = paymentMethod;
     }
 
-    /** 
-     * @param toString(
-     * @return int
-     */
+
     // Getters
 
     public int getTransactionId() { return transactionId; }
@@ -75,9 +72,7 @@ public class Transaction implements Serializable {
 
     public String getPaymentMethod() { return paymentMethod; }
 
-    /** 
-     * @param toString(
-     */
+
     // Setters
 
     public void setTransactionId(int id) { this.transactionId = id; }

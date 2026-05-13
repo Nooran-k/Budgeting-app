@@ -1,7 +1,7 @@
 /**
  * Controller responsible for generating financial reports.
  */
-package controller;
+package service;
 
 import data.Database;
 import model.Report;

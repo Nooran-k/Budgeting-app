@@ -64,10 +64,7 @@ public class Notification implements Serializable {
         this.isRead = true;
     }
 
-    /** 
-     * @param id
-     * @return int
-     */
+
     // Getters
 
     public int getNotificationId() { return notificationId; }

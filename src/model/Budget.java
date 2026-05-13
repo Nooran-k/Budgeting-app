@@ -105,10 +105,7 @@ public class Budget implements Serializable {
             || status == BudgetStatus.EXCEEDED;
     }
 
-    /** 
-     * @param id
-     * @return int
-     */
+
     // Getters
 
     public int getBudgetId() { return budgetId; }

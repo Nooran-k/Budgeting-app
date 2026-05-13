@@ -1,6 +1,6 @@
-package view;
+package ui;
 
-import controller.GoalController;
+import service.GoalController;
 import model.FinancialGoal;
 
 import javax.swing.*;
